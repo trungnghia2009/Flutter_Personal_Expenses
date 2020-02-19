@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import 'package:intl/intl.dart';
 
+// Add to check git
 class NewTransaction extends StatefulWidget {
   NewTransaction({@required this.addTransaction});
   final Function addTransaction;
