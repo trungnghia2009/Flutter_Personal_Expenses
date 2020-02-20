@@ -4,10 +4,17 @@ import 'widgets/new_transaction.dart';
 import 'models/transaction.dart';
 import 'widgets/transaction_list.dart';
 import 'widgets/chart.dart';
+import 'package:flutter/services.dart';
 
 const Color myColor = Colors.red;
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(new MyApp());
+//  SystemChrome.setPreferredOrientations([
+//    DeviceOrientation.portraitUp,
+//    DeviceOrientation.portraitDown,
+//  ]);
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -18,7 +25,7 @@ class MyApp extends StatelessWidget {
         // TODO: Set color,
         errorColor: Colors.red,
         primarySwatch: Colors.purple, // Set color to primary color
-        accentColor: Colors.amber, // Set color to FloatingActionButton
+        accentColor: Colors.amber, // Set color to FloatingActionButton/Switch
         fontFamily: 'Quicksand',
         textTheme: ThemeData.light().textTheme.copyWith(
             // Set style for text
@@ -57,6 +64,8 @@ class _HomePageState extends State<HomePage> {
 //      date: DateTime.now(),
 //    ),
   ];
+
+  bool _switchValue = false;
 
   // TODO: 'where' method exists in every List, allow to run a function
   // TODO: if function returns true, the item is kept in a newly returned list
@@ -100,22 +109,38 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Personal Expenses',
-          style: TextStyle(fontFamily: 'OpenSans'),
-        ),
-        actions: <Widget>[
-          // TODO: Remember types of button, IconButton, FlatButton ....
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              _startAddNewTransaction(context);
-            },
-          ),
-        ],
+    // TODO: assign isLandscape as bool type follow Orientation.landscape
+    final mediaQueryData = MediaQuery.of(context);
+    final isLandscape = mediaQueryData.orientation == Orientation.landscape;
+    final appBar = AppBar(
+      title: Text(
+        'Personal Expenses',
+        style: TextStyle(fontFamily: 'OpenSans'),
       ),
+      actions: <Widget>[
+        // TODO: Remember types of button, IconButton, FlatButton ....
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () {
+            _startAddNewTransaction(context);
+          },
+        ),
+      ],
+    );
+
+    final txListWidget = Container(
+      height: (mediaQueryData.size.height -
+              appBar.preferredSize.height -
+              mediaQueryData.padding.top) *
+          0.7,
+      child: TransactionList(
+        transactions: _recentTransactions,
+        deleteTransaction: _deleteTransaction,
+      ),
+    );
+
+    return Scaffold(
+      appBar: appBar,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
@@ -129,15 +154,44 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Chart(
-                recentTransactions: _userTransactions,
-              ),
-              // TODO: Remember this!!, there is no () in _addTransaction function
-              // TODO: setSate() was only implemented in Stateful class
-              TransactionList(
-                transactions: _recentTransactions,
-                deleteTransaction: _deleteTransaction,
-              ),
+              // TODO: For landscape mode
+              if (isLandscape)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text('Show Chart'),
+                    Switch(
+                        value: _switchValue,
+                        onChanged: (val) {
+                          setState(() {
+                            _switchValue = val;
+                          });
+                        })
+                  ],
+                ),
+              if (isLandscape)
+                _switchValue
+                    ? Container(
+                        // TODO: (total height - appBar height - statusBar height) * dynamic rate
+                        height: (mediaQueryData.size.height -
+                                appBar.preferredSize.height -
+                                mediaQueryData.padding.top) *
+                            0.7,
+                        child: Chart(recentTransactions: _userTransactions),
+                      )
+                    : txListWidget,
+
+              // TODO: For portrait mode
+              if (!isLandscape)
+                Container(
+                  height: (mediaQueryData.size.height -
+                          appBar.preferredSize.height -
+                          mediaQueryData.padding.top) *
+                      0.3,
+                  child: Chart(recentTransactions: _userTransactions),
+                ),
+              if (!isLandscape)
+                txListWidget,
             ],
           ),
         ),
