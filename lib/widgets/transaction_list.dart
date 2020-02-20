@@ -18,7 +18,10 @@ class TransactionList extends StatelessWidget {
           height: 20,
         ),
         Flexible(
-          child: Image.asset('assets/images/waiting.png'),
+          child: Image.asset(
+            'assets/images/waiting.png',
+            fit: BoxFit.cover,
+          ),
         ),
       ],
     );

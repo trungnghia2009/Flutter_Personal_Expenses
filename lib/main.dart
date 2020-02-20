@@ -5,7 +5,6 @@ import 'models/transaction.dart';
 import 'widgets/transaction_list.dart';
 import 'widgets/chart.dart';
 import 'dart:io' show Platform;
-import 'package:flutter/cupertino.dart';
 
 const Color myColor = Colors.red;
 
@@ -209,13 +208,12 @@ class _HomePageState extends State<HomePage> {
 
     return Platform.isIOS
         ? CupertinoPageScaffold(
-            child: bodyPage,
             navigationBar: appBar,
+            child: bodyPage,
           )
         : Scaffold(
             appBar: appBar,
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
             floatingActionButton: Platform.isIOS
                 ? Container()
                 : FloatingActionButton(
