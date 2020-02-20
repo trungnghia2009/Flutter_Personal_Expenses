@@ -4,7 +4,8 @@ import 'widgets/new_transaction.dart';
 import 'models/transaction.dart';
 import 'widgets/transaction_list.dart';
 import 'widgets/chart.dart';
-import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/cupertino.dart';
 
 const Color myColor = Colors.red;
 
@@ -112,21 +113,36 @@ class _HomePageState extends State<HomePage> {
     // TODO: assign isLandscape as bool type follow Orientation.landscape
     final mediaQueryData = MediaQuery.of(context);
     final isLandscape = mediaQueryData.orientation == Orientation.landscape;
-    final appBar = AppBar(
-      title: Text(
-        'Personal Expenses',
-        style: TextStyle(fontFamily: 'OpenSans'),
-      ),
-      actions: <Widget>[
-        // TODO: Remember types of button, IconButton, FlatButton ....
-        IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () {
-            _startAddNewTransaction(context);
-          },
-        ),
-      ],
-    );
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text(
+              'Personal Expenses',
+            ),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Semantics(
+                child: Icon(
+                  CupertinoIcons.add,
+                  size: 32,
+                ),
+              ),
+              onPressed: () => _startAddNewTransaction(context),
+            ),
+          )
+        : AppBar(
+            title: Text(
+              'Personal Expenses',
+            ),
+            actions: <Widget>[
+              // TODO: Remember types of button, IconButton, FlatButton ....
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  _startAddNewTransaction(context);
+                },
+              ),
+            ],
+          );
 
     final txListWidget = Container(
       height: (mediaQueryData.size.height -
@@ -139,63 +155,77 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    return Scaffold(
-      appBar: appBar,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          _startAddNewTransaction(context);
-        },
-      ),
-      // TODO: add SingleChildScrollView on the top to fix pixel overlapping by keyboard
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              // TODO: For landscape mode
-              if (isLandscape)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text('Show Chart'),
-                    Switch(
-                        value: _switchValue,
-                        onChanged: (val) {
-                          setState(() {
-                            _switchValue = val;
-                          });
-                        })
-                  ],
-                ),
-              if (isLandscape)
-                _switchValue
-                    ? Container(
-                        // TODO: (total height - appBar height - statusBar height) * dynamic rate
-                        height: (mediaQueryData.size.height -
-                                appBar.preferredSize.height -
-                                mediaQueryData.padding.top) *
-                            0.7,
-                        child: Chart(recentTransactions: _userTransactions),
-                      )
-                    : txListWidget,
+    final bodyPage = SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            // TODO: For landscape mode
+            if (isLandscape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Show Chart',
+                    style: Theme.of(context).textTheme.title,
+                  ),
+                  Switch.adaptive(
+                      activeColor: Theme.of(context).accentColor,
+                      value: _switchValue,
+                      onChanged: (val) {
+                        setState(() {
+                          _switchValue = val;
+                        });
+                      })
+                ],
+              ),
+            if (isLandscape)
+              _switchValue
+                  ? Container(
+                      // TODO: (total height - appBar height - statusBar height) * dynamic rate
+                      height: (mediaQueryData.size.height -
+                              appBar.preferredSize.height -
+                              mediaQueryData.padding.top) *
+                          0.7,
+                      child: Chart(recentTransactions: _userTransactions),
+                    )
+                  : txListWidget,
 
-              // TODO: For portrait mode
-              if (!isLandscape)
-                Container(
-                  height: (mediaQueryData.size.height -
-                          appBar.preferredSize.height -
-                          mediaQueryData.padding.top) *
-                      0.3,
-                  child: Chart(recentTransactions: _userTransactions),
-                ),
-              if (!isLandscape)
-                txListWidget,
-            ],
-          ),
+            // TODO: For portrait mode
+            if (!isLandscape)
+              Container(
+                height: (mediaQueryData.size.height -
+                        appBar.preferredSize.height -
+                        mediaQueryData.padding.top) *
+                    0.3,
+                child: Chart(recentTransactions: _userTransactions),
+              ),
+            if (!isLandscape)
+              txListWidget,
+          ],
         ),
       ),
     );
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            child: bodyPage,
+            navigationBar: appBar,
+          )
+        : Scaffold(
+            appBar: appBar,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    child: Icon(Icons.add),
+                    onPressed: () {
+                      _startAddNewTransaction(context);
+                    },
+                  ),
+            // TODO: add SingleChildScrollView on the top to fix pixel overlapping by keyboard
+            body: bodyPage,
+          );
   }
 }

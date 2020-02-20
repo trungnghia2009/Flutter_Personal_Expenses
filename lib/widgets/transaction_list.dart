@@ -18,9 +18,7 @@ class TransactionList extends StatelessWidget {
           height: 20,
         ),
         Flexible(
-          child: Image(
-            image: AssetImage('assets/images/waiting.png'),
-          ),
+          child: Image.asset('assets/images/waiting.png'),
         ),
       ],
     );
