@@ -49,7 +49,27 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+  // TODO: App lifeCycle
+  // ----------------------------------
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    print(state);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.addObserver(this);
+  }
+  // -----------------------------------------------
+
   final List<Transaction> _userTransactions = [
 //    Transaction(
 //      id: 'id1',
@@ -99,6 +119,12 @@ class _HomePageState extends State<HomePage> {
   // TODO: Add BottomSheet
   void _startAddNewTransaction(BuildContext ctx) {
     showModalBottomSheet(
+        // TODO: isScrollControlled == true allow the bottom sheet to take the full required height
+        elevation: 5,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        isScrollControlled: true,
         context: ctx,
         builder: (_) {
           return NewTransaction(
@@ -107,41 +133,96 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
+  List<Widget> _buildLandscapeContent(
+      MediaQueryData mediaQueryData, AppBar appBar, Widget txListWidget) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'Show Chart',
+            style: Theme.of(context).textTheme.title,
+          ),
+          Switch.adaptive(
+              activeColor: Theme.of(context).accentColor,
+              value: _switchValue,
+              onChanged: (val) {
+                setState(() {
+                  _switchValue = val;
+                });
+              })
+        ],
+      ),
+      _switchValue
+          ? Container(
+              // TODO: (total height - appBar height - statusBar height) * dynamic rate
+              height: (mediaQueryData.size.height -
+                      appBar.preferredSize.height -
+                      mediaQueryData.padding.top) *
+                  0.7,
+              child: Chart(recentTransactions: _userTransactions),
+            )
+          : txListWidget
+    ];
+  }
+
+  List<Widget> _buildPortraitContent(MediaQueryData mediaQueryData,
+      PreferredSizeWidget appBar, Widget txListWidget) {
+    return [
+      Container(
+        height: (mediaQueryData.size.height -
+                appBar.preferredSize.height -
+                mediaQueryData.padding.top) *
+            0.3,
+        child: Chart(recentTransactions: _userTransactions),
+      ),
+      txListWidget
+    ];
+  }
+
+  Widget _buildCupertinoNavigationBar() {
+    return CupertinoNavigationBar(
+      middle: const Text(
+        'Personal Expenses',
+      ),
+      trailing: CupertinoButton(
+        padding: EdgeInsets.zero,
+        child: Semantics(
+          child: const Icon(
+            CupertinoIcons.add,
+            size: 32,
+          ),
+        ),
+        onPressed: () => _startAddNewTransaction(context),
+      ),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return AppBar(
+      title: const Text(
+        'Personal Expenses',
+      ),
+      actions: <Widget>[
+        // TODO: Remember types of button, IconButton, FlatButton ....
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () {
+            _startAddNewTransaction(context);
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('build HomePage()');
     // TODO: assign isLandscape as bool type follow Orientation.landscape
     final mediaQueryData = MediaQuery.of(context);
     final isLandscape = mediaQueryData.orientation == Orientation.landscape;
-    final PreferredSizeWidget appBar = Platform.isIOS
-        ? CupertinoNavigationBar(
-            middle: Text(
-              'Personal Expenses',
-            ),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Semantics(
-                child: Icon(
-                  CupertinoIcons.add,
-                  size: 32,
-                ),
-              ),
-              onPressed: () => _startAddNewTransaction(context),
-            ),
-          )
-        : AppBar(
-            title: Text(
-              'Personal Expenses',
-            ),
-            actions: <Widget>[
-              // TODO: Remember types of button, IconButton, FlatButton ....
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () {
-                  _startAddNewTransaction(context);
-                },
-              ),
-            ],
-          );
+    final PreferredSizeWidget appBar =
+        Platform.isIOS ? _buildCupertinoNavigationBar() : _buildAppBar();
 
     final txListWidget = Container(
       height: (mediaQueryData.size.height -
@@ -158,50 +239,17 @@ class _HomePageState extends State<HomePage> {
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            // TODO: For landscape mode
-            if (isLandscape)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    'Show Chart',
-                    style: Theme.of(context).textTheme.title,
-                  ),
-                  Switch.adaptive(
-                      activeColor: Theme.of(context).accentColor,
-                      value: _switchValue,
-                      onChanged: (val) {
-                        setState(() {
-                          _switchValue = val;
-                        });
-                      })
-                ],
-              ),
-            if (isLandscape)
-              _switchValue
-                  ? Container(
-                      // TODO: (total height - appBar height - statusBar height) * dynamic rate
-                      height: (mediaQueryData.size.height -
-                              appBar.preferredSize.height -
-                              mediaQueryData.padding.top) *
-                          0.7,
-                      child: Chart(recentTransactions: _userTransactions),
-                    )
-                  : txListWidget,
+          children: isLandscape
+              ? _buildLandscapeContent(mediaQueryData, appBar, txListWidget)
+              : _buildPortraitContent(mediaQueryData, appBar, txListWidget),
 
-            // TODO: For portrait mode
-            if (!isLandscape)
-              Container(
-                height: (mediaQueryData.size.height -
-                        appBar.preferredSize.height -
-                        mediaQueryData.padding.top) *
-                    0.3,
-                child: Chart(recentTransactions: _userTransactions),
-              ),
-            if (!isLandscape)
-              txListWidget,
-          ],
+// TODO: can use '...' before List<Widget> to merge to one Widget
+//          children: <Widget>[
+//            if (!isLandscape)
+//              ..._buildPortraitContent(mediaQueryData, appBar, txListWidget),
+//            if (isLandscape)
+//              ..._buildLandscapeContent(mediaQueryData, appBar, txListWidget)
+//          ],
         ),
       ),
     );

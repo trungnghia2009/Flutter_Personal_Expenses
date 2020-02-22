@@ -6,7 +6,9 @@ import 'adaptive_flat_button.dart';
 
 // Add to check git
 class NewTransaction extends StatefulWidget {
-  NewTransaction({@required this.addTransaction});
+  NewTransaction({@required this.addTransaction}) {
+    print('Contructor');
+  }
   final Function addTransaction;
 
   @override
@@ -62,63 +64,61 @@ class _NewTransactionState extends State<NewTransaction> {
   Widget build(BuildContext context) {
     // TODO: Using 'SingleChildScrollView' to avoid overlapping by keyboard
     return SingleChildScrollView(
-      child: Card(
-        child: Container(
-          padding: EdgeInsets.only(
-            right: 20,
-            left: 20,
-            top: 10,
-            // TODO: Limit bottom of card with the last widget is 10
-            bottom: MediaQuery.of(context).viewInsets.bottom + 10,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              TextField(
-                decoration: InputDecoration(labelText: 'Title'),
-                controller: _titleController,
-                // TODO: (_) means don't care about parameters/arguments
-                onSubmitted: (_) => _submitData(),
-              ),
-              TextField(
-                decoration: InputDecoration(labelText: 'Amount'),
-                controller: _amountController,
-                // TODO: .numberWithOptions(decimal: true) for iOS, .number for android
-                keyboardType: Platform.isIOS
-                    ? TextInputType.numberWithOptions(decimal: true)
-                    : TextInputType.number,
-                onSubmitted: (_) => _submitData(),
-              ),
-              Container(
-                height: 70,
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(_datePicker == null
-                          ? 'No Date Chosen'
-                          : 'Picked Date: ${DateFormat.yMMMd().format(_datePicker)}'),
-                    ),
-                    AdaptiveFlatButton(
-                      text: 'Choose Date',
-                      presentDate: _presentDatePicker,
-                    ),
-                  ],
-                ),
-              ),
-              RaisedButton(
-                onPressed: _submitData,
-                child: Text(
-                  'Add Transaction',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+      child: Container(
+        padding: EdgeInsets.only(
+          right: 20,
+          left: 20,
+          top: 10,
+          // TODO: Limit bottom of card with the last widget is 10
+          bottom: MediaQuery.of(context).viewInsets.bottom + 10,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            TextField(
+              decoration: const InputDecoration(labelText: 'Title'),
+              controller: _titleController,
+              // TODO: (_) means don't care about parameters/arguments
+              onSubmitted: (_) => _submitData(),
+            ),
+            TextField(
+              decoration: const InputDecoration(labelText: 'Amount'),
+              controller: _amountController,
+              // TODO: .numberWithOptions(decimal: true) for iOS, .number for android
+              keyboardType: Platform.isIOS
+                  ? const TextInputType.numberWithOptions(decimal: true)
+                  : TextInputType.number,
+              onSubmitted: (_) => _submitData(),
+            ),
+            Container(
+              height: 70,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(_datePicker == null
+                        ? 'No Date Chosen'
+                        : 'Picked Date: ${DateFormat.yMMMd().format(_datePicker)}'),
                   ),
+                  AdaptiveFlatButton(
+                    text: 'Choose Date',
+                    presentDate: _presentDatePicker,
+                  ),
+                ],
+              ),
+            ),
+            RaisedButton(
+              onPressed: _submitData,
+              child: const Text(
+                'Add Transaction',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
                 ),
-                // TODO: Set color from global theme
-                color: Theme.of(context).primaryColor,
-                textColor: Theme.of(context).textTheme.button.color,
-              )
-            ],
-          ),
+              ),
+              // TODO: Set color from global theme
+              color: Theme.of(context).primaryColor,
+              textColor: Theme.of(context).textTheme.button.color,
+            )
+          ],
         ),
       ),
     );
