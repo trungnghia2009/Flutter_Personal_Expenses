@@ -133,8 +133,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         });
   }
 
-  List<Widget> _buildLandscapeContent(
-      MediaQueryData mediaQueryData, AppBar appBar, Widget txListWidget) {
+  List<Widget> _buildLandscapeContent(MediaQueryData mediaQueryData,
+      PreferredSizeWidget appBar, Widget txListWidget) {
     return [
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -180,10 +180,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     ];
   }
 
-  Widget _buildCupertinoNavigationBar() {
+  Widget _buildCupertinoNavigationBar(BuildContext context) {
     return CupertinoNavigationBar(
       middle: const Text(
         'Personal Expenses',
+        style: TextStyle(color: Colors.white),
       ),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
@@ -191,14 +192,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           child: const Icon(
             CupertinoIcons.add,
             size: 32,
+            color: Colors.white,
           ),
         ),
         onPressed: () => _startAddNewTransaction(context),
       ),
+      backgroundColor: Colors.purple,
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(BuildContext context) {
     return AppBar(
       title: const Text(
         'Personal Expenses',
@@ -221,8 +224,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // TODO: assign isLandscape as bool type follow Orientation.landscape
     final mediaQueryData = MediaQuery.of(context);
     final isLandscape = mediaQueryData.orientation == Orientation.landscape;
-    final PreferredSizeWidget appBar =
-        Platform.isIOS ? _buildCupertinoNavigationBar() : _buildAppBar();
+    // TODO: assign PreferredSizeWidget type to get height size of appBar
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? _buildCupertinoNavigationBar(context)
+        : _buildAppBar(context);
 
     final txListWidget = Container(
       height: (mediaQueryData.size.height -

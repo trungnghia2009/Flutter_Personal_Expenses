@@ -63,62 +63,85 @@ class _NewTransactionState extends State<NewTransaction> {
   @override
   Widget build(BuildContext context) {
     // TODO: Using 'SingleChildScrollView' to avoid overlapping by keyboard
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.only(
-          right: 20,
-          left: 20,
-          top: 10,
-          // TODO: Limit bottom of card with the last widget is 10
-          bottom: MediaQuery.of(context).viewInsets.bottom + 10,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: <Widget>[
-            TextField(
-              decoration: const InputDecoration(labelText: 'Title'),
-              controller: _titleController,
-              // TODO: (_) means don't care about parameters/arguments
-              onSubmitted: (_) => _submitData(),
-            ),
-            TextField(
-              decoration: const InputDecoration(labelText: 'Amount'),
-              controller: _amountController,
-              // TODO: .numberWithOptions(decimal: true) for iOS, .number for android
-              keyboardType: Platform.isIOS
-                  ? const TextInputType.numberWithOptions(decimal: true)
-                  : TextInputType.number,
-              onSubmitted: (_) => _submitData(),
-            ),
-            Container(
-              height: 70,
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(_datePicker == null
-                        ? 'No Date Chosen'
-                        : 'Picked Date: ${DateFormat.yMMMd().format(_datePicker)}'),
-                  ),
-                  AdaptiveFlatButton(
-                    text: 'Choose Date',
-                    presentDate: _presentDatePicker,
-                  ),
-                ],
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.only(
+            right: 20,
+            left: 20,
+            top: 10,
+            // TODO: Limit bottom of card with the last widget is 10
+            bottom: MediaQuery.of(context).viewInsets.bottom + 10,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              TextField(
+                decoration: const InputDecoration(labelText: 'Title'),
+                controller: _titleController,
+                // TODO: (_) means don't care about parameters/arguments
+                onSubmitted: (_) => _submitData(),
               ),
-            ),
-            RaisedButton(
-              onPressed: _submitData,
-              child: const Text(
-                'Add Transaction',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
+              TextField(
+                decoration: const InputDecoration(labelText: 'Amount'),
+                controller: _amountController,
+                // TODO: .numberWithOptions(decimal: true) for iOS, .number for android
+                keyboardType: Platform.isIOS
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.number,
+                onSubmitted: (_) => _submitData(),
+              ),
+              Container(
+                height: 70,
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(_datePicker == null
+                          ? 'No Date Chosen'
+                          : 'Picked Date: ${DateFormat.yMMMd().format(_datePicker)}'),
+                    ),
+                    AdaptiveFlatButton(
+                      text: 'Choose Date',
+                      presentDate: _presentDatePicker,
+                    ),
+                  ],
                 ),
               ),
-              // TODO: Set color from global theme
-              color: Theme.of(context).primaryColor,
-              textColor: Theme.of(context).textTheme.button.color,
-            )
-          ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  RaisedButton(
+                    onPressed: () {
+                      setState(() {
+                        Navigator.pop(context);
+                      });
+                    },
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    // TODO: Set color from global theme
+                    color: Theme.of(context).primaryColor,
+                    textColor: Theme.of(context).textTheme.button.color,
+                  ),
+                  RaisedButton(
+                    onPressed: _submitData,
+                    child: const Text(
+                      'Add Transaction',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    // TODO: Set color from global theme
+                    color: Theme.of(context).primaryColor,
+                    textColor: Theme.of(context).textTheme.button.color,
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
